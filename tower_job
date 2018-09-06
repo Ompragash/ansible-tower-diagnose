@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#Import required python modules
+import requests,json,getpass
+import os
+import ConfigParser
+
+#Disabling InsecureRequestWarnings in python requests module
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+def tower_job(url, user, passwd, job_id):
+    """This function returns the 
+    api endpoint for a given job_id and store the output
+    in a text file"""
+    req = requests.get(url + '/api/v2/jobs/' + job_id, auth=(user, passwd), verify=False)
+    results = str(json.dumps(req.json(), sort_keys=True, indent=4))
+    write(results, job_id)
+
+def write(results, job_id):
+    f = open('job_' + job_id + '.txt','w')
+    f.write(results)
+    f.close()
+
+if __name__ == '__main__':
+
+    #Read Config
+    config = ConfigParser.SafeConfigParser()
+    config.read('config.ini')
+    url = config.get('tower', 'url')
+    user = config.get('tower', 'username')
+    passwd = config.get('tower', 'password')
+    job_id = raw_input('Enter the job ID : ')
+
+    # calling tower_ping function
+    tower_job(url, user, passwd, job_id)
+

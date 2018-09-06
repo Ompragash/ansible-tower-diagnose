@@ -6,7 +6,7 @@ import requests,json,getpass
 import os,sys
 import ConfigParser
 
-#Disabling InsecureRequestWarnings in python requests module?
+#Disabling InsecureRequestWarnings in python requests module
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 

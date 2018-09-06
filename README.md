@@ -1,2 +1,2 @@
 # anisble-tower-diagnose
-tower_diagnose script pulls the details of all Ansible Tower objects and returns the output in a file.
+This repository contains scripts which is used to pull the required details from Ansible Tower and store the output in a text file.

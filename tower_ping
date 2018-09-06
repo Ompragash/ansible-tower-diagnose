@@ -14,9 +14,12 @@ def tower_ping(url, user, passwd):
     """This function returns the 
     ping api endpoint and store the output
     in a text file"""
-    req = requests.get(url + '/api/v2/ping', auth=(user, passwd), verify=False)
-    results = str(json.dumps(req.json(), sort_keys=True, indent=4))
-    write(results)
+    try:
+        req = requests.get(url + '/api/v2/ping', auth=(user, passwd), verify=False)
+        results = str(json.dumps(req.json(), sort_keys=True, indent=4))
+        write(results)
+    except requests.exceptions.ConnectionError as error:
+        print('Unable to GET api ping endpoint due to error : {0} '. format(error))
 
 def write(results):
     f = open('ping_status.txt','w')

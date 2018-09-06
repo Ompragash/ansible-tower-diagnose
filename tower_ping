@@ -12,14 +12,14 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def tower_ping(url, user, passwd):
     """This function returns the 
-    api ping endpoint and store the output
-    in a file"""
+    ping api endpoint and store the output
+    in a text file"""
     req = requests.get(url + '/api/v2/ping', auth=(user, passwd), verify=False)
     results = str(json.dumps(req.json(), sort_keys=True, indent=4))
     write(results)
 
 def write(results):
-    f = open('ping_endpoint','w')
+    f = open('ping_status.txt','w')
     f.write(results)
     f.close()
 

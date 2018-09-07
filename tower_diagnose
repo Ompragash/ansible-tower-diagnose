@@ -1,0 +1,150 @@
+#!/usr/bin/env python
+
+import urllib3, requests, json
+import ConfigParser
+
+# Importing Ansible Tower python libraries
+import tower_cli
+from tower_cli import get_resource
+from tower_cli import conf
+
+#Disabling Warnings in python requests module
+requests.packages.urllib3.disable_warnings()
+
+class AnsibleTower:
+    def __init__(self, host, username, password):
+        self.host = host
+        self.username = username
+        self.password = password
+
+    # Authenticate to Tower API and get API auth Token
+    def auth_token(self):
+        try:
+            req = urllib3.PoolManager().request(
+                'POST', self.host + '/api/v2/authtoken/',
+                headers = {
+                    "Content-Type": "application/json"
+                },
+                body = json.dumps({
+                    "username": self.username,
+                    "password": self.password
+                })
+            )
+            results = json.loads(req.data)
+            self.token = results['token']
+        except Exception as error:
+            print('Unable to retrieve AuthToken due to error: {0}'.format(error))
+    
+    # Get Tower PING endpoint
+    def endpoint_ping(self):
+        try:
+            req = urllib3.PoolManager().request(
+                'GET', self.host + '/api/v2/ping/', 
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": "Token " + self.token
+                }
+            )
+            results = str(json.dumps(json.loads(req.data), sort_keys=True, indent=4))
+            f = open('ping.tower', 'w')
+            f.write(results)
+            f.close()
+        except Exception as error:
+            print('Unable to get api PING endpoint due to error: {0}'.format(error))
+
+    # Retrieve Tower Organizations
+    def organizations(self, org_id = None):
+        try:
+            if org_id != None:
+                req = urllib3.PoolManager().request(
+                    'GET', self.host + '/api/v2/organizations/' + str(org_id) + '/',
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": "Token " + self.token
+                    }
+                )
+                results = str(json.dumps(json.loads(req.data), sort_keys=True, indent=4))
+            else:
+                with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+                    req = tower_cli.get_resource('organization')
+                    results = str(json.dumps(req.list(all_pages=True), sort_keys=True, indent=4))
+            f = open('organizations.tower','w')
+            f.write(results)
+            f.close()
+            return results
+        except Exception as error:
+            print('Unable to get Tower Organization due to error: {0}'.format(error))
+    
+    # Get Tower Projects
+    def projects(self, project_id = None):
+        try:
+            if project_id != None:
+                req = urllib3.PoolManager().request(
+                    'GET', self.host + '/api/v2/projects/' + str(project_id) + '/',
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": "Token " + self.token
+                    }
+                )
+                results = str(json.dumps(json.loads(req.data), sort_keys=True, indent=4))
+            else:
+                with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+                    req = tower_cli.get_resource('project') 
+                    results = str(json.dumps(req.list(all_pages=True), sort_keys=True, indent=4))
+            f = open('projects.tower','w')
+            f.write(results)
+            f.close()
+            return results
+        except Exception as error:
+            print('Unable to get Tower Projects due to error: {0}'.format(error))
+
+    # Get Tower Inventories
+    def inventories(self, inventory_id = None):
+        try:
+            if inventory_id != None:
+                req = urllib3.PoolManager().request(
+                    'GET', self.host + '/api/v2/inventories/' + str(inventory_id) + '/',
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": "Token " + self.token
+                    }
+                )
+                results = str(json.dumps(json.loads(req.data), sort_keys=True, indent=4))
+            else:
+                with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+                    req = tower_cli.get_resource('inventory')
+                    results = str(json.dumps(req.list(all_pages=True), sort_keys=True, indent=4))
+            f = open('inventories.tower','w')
+            f.write(results)
+            f.close()
+            return results
+        except Exception as error:
+            print('Unable to get Tower Inventories due to error: {0}'.format(error))
+
+    # Get Tower resources based on given resource type
+    def get_resource(self, key = 'setting'):
+        with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+            req = tower_cli.get_resource(key)
+            results = str(json.dumps(req.read(), sort_keys=True, indent=4))
+            f = open('setting.tower','w')
+            f.write(results)
+            f.close()
+        return results
+
+if __name__ == '__main__':
+    
+    # Read settings from config.ini
+    config = ConfigParser.SafeConfigParser()
+    config.read('config.ini')
+    
+    host = config.get('tower', 'url')
+    username = config.get('tower', 'username')
+    password = config.get('tower', 'password')
+
+    tower = AnsibleTower(host, username, password)
+    tower.auth_token()
+    tower.endpoint_ping()
+    tower.organizations()
+    tower.projects(4)
+    tower.inventories()
+    tower.get_resource()

@@ -1,7 +1,14 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-import urllib3, requests, json
+import urllib3
+import requests
 import ConfigParser
+import datetime
+import glob
+import tarfile
+import os
+import json
 
 # Importing Ansible Tower python libraries
 import tower_cli
@@ -13,6 +20,7 @@ requests.packages.urllib3.disable_warnings()
 
 class AnsibleTower:
     def __init__(self, host, username, password):
+    """ Constructor for this class. """
         self.host = host
         self.username = username
         self.password = password
@@ -53,7 +61,7 @@ class AnsibleTower:
             print('Unable to get api PING endpoint due to error: {0}'.format(error))
 
     # Retrieve Tower Organizations
-    def organizations(self, org_id = None):
+    def tower_organization(self, org_id = None):
         try:
             if org_id != None:
                 req = urllib3.PoolManager().request(
@@ -71,12 +79,11 @@ class AnsibleTower:
             f = open('organizations.tower','w')
             f.write(results)
             f.close()
-            return results
         except Exception as error:
             print('Unable to get Tower Organization due to error: {0}'.format(error))
     
     # Get Tower Projects
-    def projects(self, project_id = None):
+    def tower_project(self, project_id = None):
         try:
             if project_id != None:
                 req = urllib3.PoolManager().request(
@@ -94,12 +101,11 @@ class AnsibleTower:
             f = open('projects.tower','w')
             f.write(results)
             f.close()
-            return results
         except Exception as error:
             print('Unable to get Tower Projects due to error: {0}'.format(error))
 
     # Get Tower Inventories
-    def inventories(self, inventory_id = None):
+    def tower_inventory(self, inventory_id = None):
         try:
             if inventory_id != None:
                 req = urllib3.PoolManager().request(
@@ -117,19 +123,48 @@ class AnsibleTower:
             f = open('inventories.tower','w')
             f.write(results)
             f.close()
-            return results
         except Exception as error:
             print('Unable to get Tower Inventories due to error: {0}'.format(error))
 
+    # Get Tower Settings
+    def tower_settings(self):
+        try:
+            with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+                req = tower_cli.get_resource('setting')
+                results = str(json.dumps(req.read(), sort_keys=True, indent=4))
+                f = open( 'settings.tower', 'w')
+                f.write(results)
+                f.close()
+        except Exception as error:
+            print('Unable to get Tower Settings due to error: {0}'.format(error))
+
+
+
     # Get Tower resources based on given resource type
-    def get_resource(self, key = 'setting'):
-        with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
-            req = tower_cli.get_resource(key)
-            results = str(json.dumps(req.read(), sort_keys=True, indent=4))
-            f = open('setting.tower','w')
-            f.write(results)
-            f.close()
-        return results
+    def get_resource(self, key = 'job'):
+        try:
+            with conf.settings.runtime_values(host=self.host, username=self.username, password=self.password):
+                req = tower_cli.get_resource(key)
+                results = str(json.dumps(req.list(all_pages=True), sort_keys=True, indent=4))
+                f = open( key + '.tower','w')
+                f.write(results)
+                f.close()
+        except Exception as error:
+            print('Unable to get Tower ' + key + ' due to error: {0}'.format(error))
+
+def tower_diagnose():
+    #td = datetime.datetime.now()
+    #now = td.strftime('%Y-%m-%d-%H:%M:%S')
+    tar = tarfile.open('tower-diagnose.tar.bz2', 'w:bz2')
+    files = glob.glob('*.tower')
+    for f in files:
+        tar.add(f)
+    tar.close()
+
+def clean():
+    for item in os.listdir('.'):
+        if item.endswith('.tower'):
+            os.remove(item)
 
 if __name__ == '__main__':
     
@@ -144,7 +179,15 @@ if __name__ == '__main__':
     tower = AnsibleTower(host, username, password)
     tower.auth_token()
     tower.endpoint_ping()
-    tower.organizations()
-    tower.projects(4)
-    tower.inventories()
-    tower.get_resource()
+    tower.tower_organization()
+    tower.tower_project()
+    tower.tower_inventory()
+    tower.tower_settings()
+
+    temp = ['credential', 'credential_type', 'instance', 'instance_group', 'project_update', 'role', 'schedule', 'team', 'user', 'job']
+
+    for i in temp:
+        tower.get_resource(i)
+    
+    tower_diagnose()
+    clean()

@@ -21,6 +21,6 @@ pip install -r requirements.txt
 ```
 tower-diagnose-%Y-%m-%d-%H-%M-%S.tar.bz2
 ```
-
+- Unpack the newly created tar file and check for Tower endpoint details.
 
 

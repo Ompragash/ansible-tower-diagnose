@@ -1,6 +1,6 @@
 # ansible-tower-diagnose
 
-_tower-diagnose_ tool pulls all the details from Anisble Tower using REST API endpoint and stores the output in a text file with their respective endpoint.
+_tower-diagnose_ pulls all the details from Ansible Tower using REST API endpoint and stores the output in a text file with their respective endpoint.
 
 ## Requirements
 

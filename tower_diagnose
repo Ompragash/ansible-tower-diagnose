@@ -21,6 +21,7 @@ requests.packages.urllib3.disable_warnings()
 
 class AnsibleTower:
     def __init__(self, host, username, password):
+        ''' Constructor for this class. '''
         self.host = host
         self.username = username
         self.password = password
@@ -156,7 +157,7 @@ def tower_diagnose():
 
     time = datetime.datetime.now()
     dest = 'tower-diagnose'
-    files = glob.glob('*.towier')
+    files = glob.glob('*.tower')
     tar_name = dest + '-' + time.strftime('%Y-%m-%d-%H-%M-%S') + '.tar.bz2'
     tar = tarfile.open(tar_name, 'w:bz2')
 
@@ -196,7 +197,7 @@ if __name__ == '__main__':
     tower.tower_inventory()
     tower.tower_settings()
 
-    temp = ['credential', 'credential_type', 'instance', 'instance_group', 'project_update', 'role', 'schedule', 'team', 'user', 'job']
+    temp = ['credential', 'credential_type', 'instance', 'instance_group', 'project_update', 'role', 'schedule', 'team', 'user', 'job_template', 'workflow', 'workflow_job', 'job']
 
     for i in temp:
         tower.get_resource(i)

@@ -9,6 +9,7 @@ import glob
 import tarfile
 import os
 import json
+import shutil
 
 # Importing Ansible Tower python libraries
 import tower_cli
@@ -20,7 +21,6 @@ requests.packages.urllib3.disable_warnings()
 
 class AnsibleTower:
     def __init__(self, host, username, password):
-    """ Constructor for this class. """
         self.host = host
         self.username = username
         self.password = password
@@ -153,19 +153,31 @@ class AnsibleTower:
             print('Unable to get Tower ' + key + ' due to error: {0}'.format(error))
 
 def tower_diagnose():
-    #td = datetime.datetime.now()
-    #now = td.strftime('%Y-%m-%d-%H:%M:%S')
-    tar = tarfile.open('tower-diagnose.tar.bz2', 'w:bz2')
-    files = glob.glob('*.tower')
+
+    time = datetime.datetime.now()
+    dest = 'tower-diagnose'
+    files = glob.glob('*.towier')
+    tar_name = dest + '-' + time.strftime('%Y-%m-%d-%H-%M-%S') + '.tar.bz2'
+    tar = tarfile.open(tar_name, 'w:bz2')
+
+    if not os.path.exists(dest):
+        os.makedirs(dest)
     for f in files:
-        tar.add(f)
+        shutil.copy2(f, dest)
+    
+    tar.add(dest)
     tar.close()
+    print('File ' + tar_name + ' is created and stored in ' + os.getcwd())
 
 def clean():
-    for item in os.listdir('.'):
-        if item.endswith('.tower'):
-            os.remove(item)
 
+    files = glob.glob('*.tower')
+    dest = 'tower-diagnose'
+    for item in files:
+        os.remove(item)
+        
+    shutil.rmtree(dest)
+    
 if __name__ == '__main__':
     
     # Read settings from config.ini

@@ -1,6 +1,6 @@
 # ansible-tower-diagnose
 
-_tower-diagnose_ tool pulls all the details from Anisble Tower using REST API endpoint and stores the output in a text file with their respective endpoint.
+_tower-diagnose_ pulls all the details from Ansible Tower using REST API endpoint and stores the output in a text file with their respective endpoint name.
 
 ## Requirements
 
@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ```
 ./tower_diagnose
 ```
-- After execution it'll return bzip2 type tar file in the below format
+- After execution it'll return a bzip2 type tar file in the below format:
 ```
 tower-diagnose-%Y-%m-%d-%H-%M-%S.tar.bz2
 ```

@@ -1,4 +1,4 @@
 ansible-tower-cli==3.3.0
-urllib3==1.23
+urllib3==1.26.17
 configparser==3.5.0
 
